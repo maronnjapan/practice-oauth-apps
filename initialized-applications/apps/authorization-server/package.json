@@ -1,0 +1,26 @@
+{
+  "name": "authorization-server",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:apply:local": "prisma db push && wrangler d1 migrations apply authorization-server --local",
+    "db:seed:local": "wrangler d1 execute authorization-server --local --file=./seeds/seed.sql",
+    "db:setup:local": "cp .env.example .env && npm run db:apply:local && npm run db:seed:local",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@prisma/adapter-d1": "^6.16.2",
+    "@prisma/client": "6.16.2",
+    "hono": "^4.9.9"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.5",
+    "@cloudflare/workers-types": "^4.20250924.0",
+    "@quramy/prisma-fabbrica": "^2.3.1",
+    "prisma": "^6.16.2",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.4.0"
+  }
+}

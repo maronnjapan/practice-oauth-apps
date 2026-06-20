@@ -1,0 +1,78 @@
+
+PRAGMA foreign_keys = ON;
+BEGIN TRANSACTION;
+
+CREATE TABLE IF NOT EXISTS "User" (
+  "id"        TEXT PRIMARY KEY,
+  "email"     TEXT NOT NULL,
+  "password"  TEXT NOT NULL,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User" ("email");
+
+CREATE TRIGGER IF NOT EXISTS "User_updatedAt_set" 
+AFTER UPDATE ON "User"
+FOR EACH ROW
+WHEN NEW."updatedAt" = OLD."updatedAt"
+BEGIN
+  UPDATE "User" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = OLD."id";
+END;
+
+CREATE TABLE IF NOT EXISTS "Client" (
+  "clientId"     TEXT PRIMARY KEY,
+  "clientSecret" TEXT NOT NULL,
+  "createdAt"    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt"    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER IF NOT EXISTS "Client_updatedAt_set"
+AFTER UPDATE ON "Client"
+FOR EACH ROW
+WHEN NEW."updatedAt" = OLD."updatedAt"
+BEGIN
+  UPDATE "Client" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "clientId" = OLD."clientId";
+END;
+
+CREATE TABLE IF NOT EXISTS "RedirectUri" (
+  "id"        TEXT PRIMARY KEY,
+  "uri"       TEXT NOT NULL,
+  "clientId"  TEXT NOT NULL,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "RedirectUri_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("clientId") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TRIGGER IF NOT EXISTS "RedirectUri_updatedAt_set"
+AFTER UPDATE ON "RedirectUri"
+FOR EACH ROW
+WHEN NEW."updatedAt" = OLD."updatedAt"
+BEGIN
+  UPDATE "RedirectUri" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = OLD."id";
+END;
+
+CREATE INDEX IF NOT EXISTS "RedirectUri_clientId_idx" ON "RedirectUri" ("clientId");
+
+CREATE TABLE IF NOT EXISTS "Scope" (
+  "id"        TEXT PRIMARY KEY,
+  "name"      TEXT NOT NULL,
+  "clientId"  TEXT NOT NULL,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Scope_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("clientId") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "Scope_name_key" ON "Scope" ("name");
+
+CREATE TRIGGER IF NOT EXISTS "Scope_updatedAt_set"
+AFTER UPDATE ON "Scope"
+FOR EACH ROW
+WHEN NEW."updatedAt" = OLD."updatedAt"
+BEGIN
+  UPDATE "Scope" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = OLD."id";
+END;
+
+CREATE INDEX IF NOT EXISTS "Scope_clientId_idx" ON "Scope" ("clientId");
+
+COMMIT;

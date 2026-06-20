@@ -1,0 +1,25 @@
+{
+  "name": "initialized-applications",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm --filter './apps/*' --parallel --if-present run dev",
+    "build": "pnpm --filter './apps/*' --if-present run build",
+    "preview": "pnpm --filter './apps/*' --parallel --if-present run preview",
+    "deploy": "pnpm --filter './apps/*' --if-present run deploy",
+    "cf-typegen": "pnpm --filter './apps/*' --if-present run cf-typegen",
+    "db:setup:local": "pnpm --filter './apps/*' --if-present run db:setup:local",
+    "generate-keys": "pnpm --filter './apps/*' --if-present run generate-keys",
+    "setup:local": "pnpm run db:setup:local && pnpm run generate-keys",
+    "test": "pnpm --filter './apps/*' --if-present run test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.0",
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "typescript": "^5.9.2"
+  }
+}
