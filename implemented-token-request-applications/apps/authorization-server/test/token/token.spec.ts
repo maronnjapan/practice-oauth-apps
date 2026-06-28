@@ -49,6 +49,7 @@ describe('/token', () => {
 
             expect(tokenRes.status).toEqual(200)
             expect(tokenRes.headers.get('cache-control')).toEqual('no-store')
+            expect(tokenRes.headers.get('pragma')).toEqual('no-cache')
             const tokenJson = await tokenRes.json() as Record<string, unknown>
             expect(tokenJson).toHaveProperty('access_token')
             expect(tokenJson).toHaveProperty('token_type', 'Bearer')

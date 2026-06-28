@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS "Scope" (
   CONSTRAINT "Scope_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("clientId") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS "Scope_name_key" ON "Scope" ("name");
+CREATE UNIQUE INDEX IF NOT EXISTS "Scope_clientId_name_key" ON "Scope" ("clientId", "name");
 
 CREATE TRIGGER IF NOT EXISTS "Scope_updatedAt_set"
 AFTER UPDATE ON "Scope"

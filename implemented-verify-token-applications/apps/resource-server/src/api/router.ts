@@ -35,10 +35,10 @@ export const setUpApiRoutes = (baseApp: typeof app) => {
                 "WWW-Authenticate": 'Bearer error="invalid_token"',
             });
         }
-        let parsedHeader: { kid?: string };
+        let parsedHeader: { kid?: string; typ?: string; alg?: string };
         let parsedPayload: {
             iss?: string;
-            aud?: string;
+            aud?: string | string[];
             exp?: number;
             scope?: string;
             sub?: string;
@@ -52,7 +52,22 @@ export const setUpApiRoutes = (baseApp: typeof app) => {
             });
         }
 
-        // 3. 認可サーバーのJWKSエンドポイントから公開鍵を取得し、kidが一致する鍵を探す
+        // 3. JWTヘッダーのalgとtypを検証する
+        if (parsedHeader.alg !== "RS256") {
+            return c.json({ error: "invalid_token" }, 401, {
+                "WWW-Authenticate": 'Bearer error="invalid_token"',
+            });
+        }
+        if (
+            parsedHeader.typ !== "at+jwt" &&
+            parsedHeader.typ !== "application/at+jwt"
+        ) {
+            return c.json({ error: "invalid_token" }, 401, {
+                "WWW-Authenticate": 'Bearer error="invalid_token"',
+            });
+        }
+
+        // 4. 認可サーバーのJWKSエンドポイントから公開鍵を取得し、kidが一致する鍵を探す
         const jwksRes = await fetch(
             `${c.env.AUTHORIZATION_SERVER_ISSUER}/.well-known/jwks.json`,
         );
@@ -71,6 +86,15 @@ export const setUpApiRoutes = (baseApp: typeof app) => {
                 "WWW-Authenticate": 'Bearer error="invalid_token"',
             });
         }
+        if (
+            publicKeyJson.kty !== "RSA" ||
+            publicKeyJson.use !== "sig" ||
+            publicKeyJson.alg !== "RS256"
+        ) {
+            return c.json({ error: "invalid_token" }, 401, {
+                "WWW-Authenticate": 'Bearer error="invalid_token"',
+            });
+        }
         const publicKey = await crypto.subtle.importKey(
             "jwk",
             publicKeyJson,
@@ -79,7 +103,7 @@ export const setUpApiRoutes = (baseApp: typeof app) => {
             ["verify"],
         );
 
-        // 4. RS256で署名を検証する
+        // 5. RS256で署名を検証する
         const signatureBuffer = Uint8Array.from(
             base64UrlDecode(signature),
             (ch) => ch.charCodeAt(0),
@@ -96,21 +120,25 @@ export const setUpApiRoutes = (baseApp: typeof app) => {
             });
         }
 
-        // 5. issが信頼する認可サーバーと一致するか検証する
+        // 6. issが信頼する認可サーバーと一致するか検証する
         if (parsedPayload.iss !== c.env.AUTHORIZATION_SERVER_ISSUER) {
             return c.json({ error: "invalid_token" }, 401, {
                 "WWW-Authenticate": 'Bearer error="invalid_token"',
             });
         }
 
-        // 6. audが自分（リソースサーバー）宛てか検証する
-        if (parsedPayload.aud !== c.env.RESOURCE_SERVER_IDENTIFIER) {
+        // 7. audが自分（リソースサーバー）宛てか検証する
+        const expectedAudience = c.env.RESOURCE_SERVER_IDENTIFIER;
+        const audienceMatches = Array.isArray(parsedPayload.aud)
+            ? parsedPayload.aud.includes(expectedAudience)
+            : parsedPayload.aud === expectedAudience;
+        if (!audienceMatches) {
             return c.json({ error: "invalid_token" }, 401, {
                 "WWW-Authenticate": 'Bearer error="invalid_token"',
             });
         }
 
-        // 7. 有効期限を検証する
+        // 8. 有効期限を検証する
         const currentTime = Math.floor(Date.now() / 1000);
         if (!parsedPayload.exp || parsedPayload.exp < currentTime) {
             return c.json({ error: "invalid_token" }, 401, {
@@ -118,7 +146,7 @@ export const setUpApiRoutes = (baseApp: typeof app) => {
             });
         }
 
-        // 8. このAPIに必要なスコープ（read:profile）を持っているか検証する
+        // 9. このAPIに必要なスコープ（read:profile）を持っているか検証する
         const requiredScope = "read:profile";
         const tokenScopes = parsedPayload.scope
             ? parsedPayload.scope.split(" ")

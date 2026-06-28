@@ -48,10 +48,12 @@ model RedirectUri {
 
 model Scope {
   id        String   @id @default(cuid())
-  name      String   @unique
+  name      String
   clientId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   client Client @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@unique([clientId, name])
 }

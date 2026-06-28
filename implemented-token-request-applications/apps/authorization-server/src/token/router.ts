@@ -16,7 +16,7 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
         if (!contentType.includes('application/x-www-form-urlencoded')) {
             return c.json({
                 error: 'invalid_request',
-                error_description: 'Content-Typeが不正です'
+                error_description: 'Content-Type is invalid'
             }, 400)
         }
 
@@ -36,7 +36,7 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
         if (typeof clientId !== 'string' || typeof clientSecret !== 'string') {
             return c.json({
                 error: 'invalid_client',
-                error_description: 'クライアント認証に失敗しました'
+                error_description: 'Client authentication failed'
             }, 401)
         }
         const prisma = c.get('prisma')
@@ -46,7 +46,7 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
         if (!client || client.clientSecret !== clientSecret) {
             return c.json({
                 error: 'invalid_client',
-                error_description: 'クライアント認証に失敗しました'
+                error_description: 'Client authentication failed'
             }, 401)
         }
 
@@ -54,7 +54,7 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
         if (grantType !== 'authorization_code') {
             return c.json({
                 error: 'unsupported_grant_type',
-                error_description: 'grant_typeが不正です'
+                error_description: 'grant_type is invalid'
             }, 400)
         }
 
@@ -62,14 +62,14 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
         if (!code || typeof code !== 'string') {
             return c.json({
                 error: 'invalid_grant',
-                error_description: '認可コードが不正です'
+                error_description: 'Authorization code is invalid'
             }, 400)
         }
         const authorizationCodeValue = await c.env.MY_KV_NAMESPACE.get(code)
         if (!authorizationCodeValue) {
             return c.json({
                 error: 'invalid_grant',
-                error_description: '認可コードが不正です'
+                error_description: 'Authorization code is invalid'
             }, 400)
         }
         const codeJson = JSON.parse(authorizationCodeValue) as AuthorizationCodeValue
@@ -77,14 +77,14 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
         if (codeJson.clientId !== clientId) {
             return c.json({
                 error: 'invalid_grant',
-                error_description: '認可コードが不正です'
+                error_description: 'Authorization code is invalid'
             }, 400)
         }
         // 認可リクエスト時のredirect_uriとトークンリクエストのredirect_uriが一致するか確認する
         if (codeJson.redirectUri !== redirectUri) {
             return c.json({
                 error: 'invalid_grant',
-                error_description: 'redirect_uriが不正です'
+                error_description: 'redirect_uri is invalid'
             }, 400)
         }
 
@@ -134,7 +134,7 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
 
         /**
          * トークンレスポンスを返す
-         * トークンを含むレスポンスがキャッシュされないよう、Cache-Control: no-storeを必ず付与する
+         * トークンを含むレスポンスがキャッシュされないよう、Cache-Control: no-storeとPragma: no-cacheを付与する
          */
         return c.json({
             access_token: accessToken,
@@ -142,7 +142,8 @@ export const setUpTokenRoute = (baseApp: typeof app) => {
             expires_in: 3600,
             scope: codeJson.scope
         }, 200, {
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-store',
+            'Pragma': 'no-cache'
         })
     })
 }

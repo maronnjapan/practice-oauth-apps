@@ -42,14 +42,21 @@ export const setUpAuthorizeRoute = (baseApp: typeof app) => {
             return c.html(<AuthorizeError error="invalid_request" description="redirect_uriが不正です" />, 400)
         }
 
+        const redirectWithError = (error: string) => {
+            const url = new URL(redirectUri)
+            url.searchParams.set('error', error)
+            if (state) {
+                url.searchParams.set('state', state)
+            }
+            return c.redirect(url.toString())
+        }
+
         /**
          * 今回はAuthorization Code Flowのみをサポートするため、response_typeクエリの値がcodeでない場合はエラー
          * ただし、リクエストしてきたクライアント自体は許可しているクライアントなので、redirect_uriクエリの値にリダイレクトし、エラークエリを付与する
          */
         if (responseType !== 'code') {
-            const url = new URL(redirectUri)
-            url.searchParams.set('error', 'unsupported_response_type')
-            return c.redirect(url.toString())
+            return redirectWithError('unsupported_response_type')
         }
 
         /**
@@ -57,9 +64,7 @@ export const setUpAuthorizeRoute = (baseApp: typeof app) => {
          * ただし、リクエストしてきたクライアント自体は許可しているクライアントなので、redirect_uriクエリの値にリダイレクトし、エラークエリを付与する
          */
         if (!scope) {
-            const url = new URL(redirectUri)
-            url.searchParams.set('error', 'invalid_request')
-            return c.redirect(url.toString())
+            return redirectWithError('invalid_request')
         }
 
         /**
@@ -69,9 +74,7 @@ export const setUpAuthorizeRoute = (baseApp: typeof app) => {
         const requestedScopes = scope.split(' ')
         const allowedScopes = client.Scope.map(s => s.name)
         if (!requestedScopes.every(s => allowedScopes.includes(s))) {
-            const url = new URL(redirectUri)
-            url.searchParams.set('error', 'invalid_scope')
-            return c.redirect(url.toString())
+            return redirectWithError('invalid_scope')
         }
 
         /**
@@ -81,7 +84,7 @@ export const setUpAuthorizeRoute = (baseApp: typeof app) => {
          * 両方存在しない場合はPKCEを使用しないものとして扱う
          */
         if ((codeChallenge && codeChallengeMethod !== 'S256') || (!codeChallenge && codeChallengeMethod)) {
-            return c.html(<AuthorizeError error="invalid_request" description="PKCEのクエリが不正です" />, 400)
+            return redirectWithError('invalid_request')
         }
 
         /**
