@@ -100,7 +100,7 @@ pnpm test
 
 | 値 | 何を表すか | 主に登場する章 |
 |---|---|---|
-| `test@example.com` / `password123` | 認可サーバーに登録されたユーザー | 第2章・第5章 |
+| `testuser` / `password123` | 認可サーバーに登録されたユーザー | 第2章・第5章 |
 | `cli_seed_1` / `secret_12345` | 登録済みクライアントの `client_id` / `client_secret` | 第4章・第8章 |
 | `http://localhost:8788/callback` | クライアントの登録済みリダイレクトURI | 第4章・第7章 |
 | `read:profile` | クライアントが要求できるスコープ。保護リソース（`/api/profile`）へのアクセスにも必要 | 第4章・第6章・第10章 |
@@ -108,7 +108,7 @@ pnpm test
 ## 書籍本文とサンプルコードの関係
 
 各スナップショットの実装・テストコードは、書籍本文で提示しているコードと一致するように管理しています。
-ログイン（第5章：デモ資格情報 `testuser` / `password`）、同意画面のCSRFトークンと拒否時の `access_denied`（第6章）、RS256・`typ: at+jwt`・`client_secret_post` のトークンエンドポイント（第8章）、state・PKCE（第9章）、JWKSと `client_session` / `/resource` 構成（第10章）まで、本文どおりに実装されています。
+ログイン（第5章：`User`テーブルの `testuser` / `password123`）、同意画面のCSRFトークンと拒否時の `access_denied`（第6章）、RS256・`typ: at+jwt`・`client_secret_post` のトークンエンドポイント（第8章）、state・PKCE（第9章）、JWKSと `client_session` / `/resource` 構成（第10章）まで、本文どおりに実装されています。
 
 環境変数ファイルも本文と同じく `.env`（`.env.example` をコピーして作る）を使います。署名鍵について補足すると、サンプルでは `.env.example` に開発用の鍵をあらかじめ記載しているため、`db:setup:local` で `.env` を生成するだけで動作確認を始められます。鍵を作り直したい場合は `pnpm generate-keys`（`implemented-token-request-applications` 以降）で `.env` の鍵を再生成できます。
 

@@ -12,5 +12,5 @@ pnpm db:setup:local   # テスト・起動の前に必須
 pnpm test
 ```
 
-ログインのデモ資格情報はユーザー名 `testuser`・パスワード `password` です（第5章参照）。
+ログインの資格情報はユーザー名 `testuser`・パスワード `password123` です（第5章参照）。
 セットアップ手順・ポート構成は[リポジトリのREADME](../README.md)を参照してください。

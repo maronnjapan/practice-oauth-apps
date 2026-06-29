@@ -6,8 +6,8 @@ DELETE FROM "Scope";
 DELETE FROM "Client";
 DELETE FROM "User";
 
-INSERT INTO "User" ("id", "email", "password")
-VALUES ('usr_seed_1', 'test@example.com', 'password123');
+INSERT INTO "User" ("id", "username", "password")
+VALUES ('user-001', 'testuser', 'password123');
 
 INSERT INTO "Client" ("clientId", "clientSecret")
 VALUES ('cli_seed_1', 'secret_12345');

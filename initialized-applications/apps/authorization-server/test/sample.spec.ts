@@ -6,7 +6,7 @@ const userFactory = defineUserFactory()
 describe('test', () => {
     it('sample test', async () => {
         const user = await userFactory.create({
-            email: 'sampleTest@example.com',
+            username: 'sample-test-user',
             password: 'password3333333',
         })
 
@@ -15,7 +15,7 @@ describe('test', () => {
 
         const json = await res.json() as {
             id: string;
-            email: string;
+            username: string;
             password: string;
             createdAt: Date;
             updatedAt: Date;
@@ -23,7 +23,7 @@ describe('test', () => {
 
         expect(json).toHaveLength(1)
         expect(json[0].id).toEqual(user.id)
-        expect(json[0].email).toEqual(user.email)
+        expect(json[0].username).toEqual(user.username)
         expect(json[0].password).toEqual(user.password)
     })
 })

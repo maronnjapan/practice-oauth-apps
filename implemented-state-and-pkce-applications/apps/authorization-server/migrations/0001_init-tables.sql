@@ -4,13 +4,13 @@ BEGIN TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS "User" (
   "id"        TEXT PRIMARY KEY,
-  "email"     TEXT NOT NULL,
+  "username"  TEXT NOT NULL,
   "password"  TEXT NOT NULL,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User" ("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "User_username_key" ON "User" ("username");
 
 CREATE TRIGGER IF NOT EXISTS "User_updatedAt_set" 
 AFTER UPDATE ON "User"

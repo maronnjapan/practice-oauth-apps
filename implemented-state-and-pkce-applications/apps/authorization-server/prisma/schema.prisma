@@ -21,17 +21,17 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  email     String   @unique
+  username  String   @unique
   password  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Client {
   clientId     String        @id @default(cuid())
   clientSecret String
   createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  updatedAt    DateTime      @default(now()) @updatedAt
   RedirectUri  RedirectUri[]
   Scope        Scope[]
 }
@@ -41,7 +41,7 @@ model RedirectUri {
   uri       String
   clientId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   client Client @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
 }
@@ -51,7 +51,7 @@ model Scope {
   name      String
   clientId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   client Client @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
 

@@ -2,19 +2,6 @@ import { setCookie } from 'hono/cookie'
 import app from "..";
 import { Login } from "./components/Login";
 
-/**
- * 本書ではユーザー管理を実装しないため、デモユーザーをハードコードする
- * 実際のサービスではDBでユーザーを管理し、パスワードはハッシュ化して保存すること
- */
-const DEMO_USER = {
-    id: "user-001",
-    name: "テストユーザー",
-    email: "test@example.com",
-} as const
-
-const DEMO_USERNAME = "testuser"
-const DEMO_PASSWORD = "password"
-
 export const setUpLoginRoute = (baseApp: typeof app) => {
     baseApp.get('/login', async (c) => {
         // ログイン後に戻る先をクエリから受け取り、フォームに引き継ぐ
@@ -38,10 +25,20 @@ export const setUpLoginRoute = (baseApp: typeof app) => {
         }
 
         /**
-         * デモユーザーの資格情報と照合する
+         * Userテーブルの資格情報と照合する
          * どちらが間違っているかを攻撃者に伝えないため、エラーメッセージは共通にする
+         * 本書では検証用に平文パスワードを比較しているが、実際のサービスではハッシュ化して保存・照合すること
          */
-        if (username !== DEMO_USERNAME || password !== DEMO_PASSWORD) {
+        if (typeof username !== 'string' || typeof password !== 'string') {
+            return c.html(<Login redirect={redirect} errorMessage="ユーザー名またはパスワードが正しくありません" />, 401)
+        }
+
+        const prisma = c.get('prisma')
+        const user = await prisma.user.findUnique({
+            where: { username },
+        })
+
+        if (!user || user.password !== password) {
             return c.html(<Login redirect={redirect} errorMessage="ユーザー名またはパスワードが正しくありません" />, 401)
         }
 
@@ -51,7 +48,7 @@ export const setUpLoginRoute = (baseApp: typeof app) => {
          * 保存してセッションIDをキーに引くのが一般的。ここでは検証用の最小実装として、ユーザーIDを直接Cookieに入れている。
          * （改ざんを検出したい場合はHonoのsetSignedCookieを使う選択肢もあるが、本書では簡潔さを優先して使わない）
          */
-        setCookie(c, 'session', DEMO_USER.id, {
+        setCookie(c, 'session', user.id, {
             httpOnly: true,
             secure: true,
             sameSite: 'Lax',

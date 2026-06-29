@@ -7,7 +7,7 @@ const base64UrlDecode = (str: string) => {
 };
 
 /**
- * subに対応するユーザー名（第5章のデモユーザーと同じ値）
+ * subに対応するユーザー名（第5章でログインしたユーザーIDに対応する値）
  * リソースサーバーはDBを参照せず、JWTのクレームと固定値だけで応答する
  */
 const USER_NAMES: Record<string, string> = {
